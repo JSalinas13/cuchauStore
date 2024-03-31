@@ -27,4 +27,12 @@ router.get('/usuarios/:id', async (req, res) => {
 });
 
 
+
+router.post('/usuarios', async (req, res) => {
+    const newUsuario = await prisma.usuario.create({
+        data: req.body,
+    });
+    res.json(newUsuario);
+});
+
 export default router;
