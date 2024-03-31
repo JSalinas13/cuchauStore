@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Pais {
+  id_pais Int      @id @default(autoincrement())
+  pais    String
+  Estado  Estado[]
+}
+
+model Estado {
+  id_estado Int      @id @default(autoincrement())
+  estado    String
+  id_pais   Int
+  Pais      Pais     @relation(fields: [id_pais], references: [id_pais])
+  Ciudad    Ciudad[]
+}
+
+model Ciudad {
+  id_ciudad Int         @id @default(autoincrement())
+  ciudad    String
+  id_estado Int
+  Estado    Estado      @relation(fields: [id_estado], references: [id_estado])
+  Direccion Direccion[]
+}
+
+model Direccion {
+  id_direccion Int       @id @default(autoincrement())
+  direccion    String
+  descripcion  String
+  id_ciudad    Int
+  Ciudad       Ciudad    @relation(fields: [id_ciudad], references: [id_ciudad])
+  Cliente      Cliente[]
+}
+
+model Rol {
+  id_rol  Int       @id @default(autoincrement())
+  rol     String
+  Usuario Usuario[]
+}
+
+model Usuario {
+  id_usuario Int          @id @default(autoincrement())
+  correo     String       @db.VarChar(200)
+  password   String       @db.VarChar(32)
+  id_rol     Int
+  Rol        Rol          @relation(fields: [id_rol], references: [id_rol])
+  Cliente    Cliente[]
+  CuponUsado CuponUsado[]
+  Carrito    Carrito[]
+}
+
+model Cliente {
+  id_cliente       Int       @id @default(autoincrement())
+  nombre           String
+  apellido_paterno String
+  apellido_materno String?
+  telefono         String?
+  fecha_nacimiento DateTime
+  id_usuario       Int
+  id_direccion     Int
+  Usuario          Usuario   @relation(fields: [id_usuario], references: [id_usuario])
+  Direccion        Direccion @relation(fields: [id_direccion], references: [id_direccion])
+}
+
+model Proveedor {
+  id_proveedor Int        @id @default(autoincrement())
+  proveedor    String
+  telefono     String
+  correo       String
+  Producto     Producto[]
+}
+
+model Categoria {
+  id_categoria Int        @id @default(autoincrement())
+  categoria    String
+  descripcion  String
+  Producto     Producto[]
+}
+
+model Producto {
+  id_producto  Int       @id @default(autoincrement())
+  producto     String
+  precio       Float
+  almacen      Int
+  id_proveedor Int
+  id_categoria Int
+  Proveedor    Proveedor @relation(fields: [id_proveedor], references: [id_proveedor])
+  Categoria    Categoria @relation(fields: [id_categoria], references: [id_categoria])
+  Carrito      Carrito[]
+}
+
+model CuponDisponible {
+  id_cupon_d           Int          @id @default(autoincrement())
+  codigo               String
+  porcentaje_descuento Float
+  fecha_inicio         DateTime
+  fecha_fin            DateTime
+  CuponUsado           CuponUsado[]
+}
+
+model CuponUsado {
+  id_cupon_usado  Int             @id @default(autoincrement())
+  id_cupon_d      Int
+  id_usuario      Int
+  fecha_usado     DateTime
+  CuponDisponible CuponDisponible @relation(fields: [id_cupon_d], references: [id_cupon_d])
+  Usuario         Usuario         @relation(fields: [id_usuario], references: [id_usuario])
+}
+
+model Carrito {
+  id_carrito  Int      @id @default(autoincrement())
+  id_usuario  Int
+  id_producto Int
+  Usuario     Usuario  @relation(fields: [id_usuario], references: [id_usuario])
+  Producto    Producto @relation(fields: [id_producto], references: [id_producto])
+}
